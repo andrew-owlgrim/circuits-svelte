@@ -2,6 +2,8 @@
 	import { onMount } from 'svelte';
 	import CircuitsGame from './game/CircuitsGame';
 	import type { Vector } from './game-engine';
+	import { Direction } from './game/types';
+	import ShmunsistorElement from './game/entities/ShmunsistorElement';
 
 	let canvasEl: HTMLCanvasElement;
 	let game: CircuitsGame | null = null;
@@ -14,6 +16,10 @@
 	function setSelectedType(type: string) {
 		selectedType = type;
 	}
+
+	let isRotatingShmunsistor = false;
+	let rotationStartWorld: { x: number; y: number } | null = null;
+	let rotateCell: { x: number; y: number } | null = null;
 
 	function getCellCoords(event: PointerEvent) {
 		const tileSize = game!.cfg.tileSize;
@@ -56,11 +62,29 @@
 
 	function onPointerDown(event: PointerEvent) {
 		const { x, y } = getCellCoords(event);
+		const world = getWorldCoords(event); // координаты в мировом пространстве
 
 		if (event.button === 2) {
 			game!.removeElement(x, y);
 		} else if (event.button === 0) {
-			game!.placeElement(x, y, selectedType);
+			const element = game!.getElement(x, y) as any;
+			const isSelectedShmunsistor = selectedType === 'shmunsistor';
+
+			if (element instanceof ShmunsistorElement) {
+				// Вращаем существующего
+				isRotatingShmunsistor = true;
+				rotationStartWorld = world;
+				rotateCell = { x, y };
+			} else if (isSelectedShmunsistor) {
+				// Ставим и начинаем вращение нового
+				game!.placeElement(x, y, selectedType);
+				isRotatingShmunsistor = true;
+				rotationStartWorld = world;
+				rotateCell = { x, y };
+			} else {
+				// Обычное размещение
+				game!.placeElement(x, y, selectedType);
+			}
 		} else if (event.button === 1) {
 			isDraggingCamera = true;
 			lastMouse = { x: event.clientX, y: event.clientY };
@@ -69,21 +93,61 @@
 	}
 
 	function onPointerMove(event: PointerEvent) {
-		if (!isDraggingCamera) return;
+		if (isDraggingCamera) {
+			const dx = (event.clientX - lastMouse.x) / game!.camera.scale;
+			const dy = (event.clientY - lastMouse.y) / game!.camera.scale;
 
-		const dx = (event.clientX - lastMouse.x) / game!.camera.scale;
-		const dy = (event.clientY - lastMouse.y) / game!.camera.scale;
+			game!.camera.position.x -= dx;
+			game!.camera.position.y -= dy;
 
-		game!.camera.position.x -= dx;
-		game!.camera.position.y -= dy;
+			lastMouse = { x: event.clientX, y: event.clientY };
+		}
 
-		lastMouse = { x: event.clientX, y: event.clientY };
+		if (isRotatingShmunsistor && rotationStartWorld && rotateCell) {
+			const end = getWorldCoords(event);
+			const dx = end.x - rotationStartWorld.x;
+			const dy = end.y - rotationStartWorld.y;
+
+			let direction: Direction;
+			if (Math.abs(dx) > Math.abs(dy)) {
+				direction = dx > 0 ? Direction.Right : Direction.Left;
+			} else {
+				direction = dy > 0 ? Direction.Down : Direction.Up;
+			}
+
+			const shmunsistor = game!.getElement(rotateCell.x, rotateCell.y);
+			if (shmunsistor instanceof ShmunsistorElement && shmunsistor.direction !== direction) {
+				shmunsistor.direction = direction;
+			}
+		}
 	}
 
 	function onPointerUp(event: PointerEvent) {
 		if (event.button === 1) {
 			isDraggingCamera = false;
 		}
+
+		if (isRotatingShmunsistor && rotateCell && rotationStartWorld) {
+			const end = getWorldCoords(event);
+			const dx = end.x - rotationStartWorld.x;
+			const dy = end.y - rotationStartWorld.y;
+
+			let direction: Direction;
+			if (Math.abs(dx) > Math.abs(dy)) {
+				direction = dx > 0 ? Direction.Right : Direction.Left;
+			} else {
+				direction = dy > 0 ? Direction.Down : Direction.Up;
+			}
+
+			const shmunsistor = game!.getElement(rotateCell.x, rotateCell.y) as any;
+			if (shmunsistor instanceof ShmunsistorElement) {
+				shmunsistor.direction = direction;
+			}
+		}
+
+		isRotatingShmunsistor = false;
+		rotationStartWorld = null;
+		rotateCell = null;
 	}
 
 	function onMouseLeave() {

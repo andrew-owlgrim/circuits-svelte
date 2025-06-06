@@ -1,4 +1,4 @@
-import { GameEngine } from '../game-engine';
+import { GameEngine, type Vector } from '../game-engine';
 import Grid from './Grid';
 
 import type { Cfg } from './cfg';
@@ -33,5 +33,9 @@ export default class CirctuitsGame extends GameEngine {
 
 	removeElement(...params: Parameters<ElementController['removeElement']>) {
 		this.elementController.removeElement(...params);
+	}
+
+	getElement(x: number, y: number) {
+		return this.grid.get(x, y);
 	}
 }
