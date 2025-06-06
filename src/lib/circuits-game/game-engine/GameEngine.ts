@@ -18,8 +18,6 @@ export default abstract class GameEngine {
 		// this.physics = physics;
 		this.camera = new Camera();
 		this.render = new Renderer(canvas, this.entities, this.camera);
-
-		this.init();
 	}
 
 	init() {
