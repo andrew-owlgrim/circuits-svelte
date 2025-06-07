@@ -1,6 +1,6 @@
 import type CirctuitsGame from '../CircuitsGame';
 import ButtonElement from '../entities/ButtonElement';
-import type { CircuitElement } from '../entities/CircuitElement';
+import { CircuitElement } from '../entities/CircuitElement';
 import DisplayElement from '../entities/DisplayElement';
 import ShmunsistorElement from '../entities/ShmunsistorElement';
 import WireElement from '../entities/WireElement';
@@ -8,7 +8,7 @@ import WireElement from '../entities/WireElement';
 export default class ElementController {
 	constructor(private game: CirctuitsGame) {}
 
-	placeElement(x: number, y: number, element: string | null): CircuitElement | undefined {
+	placeElement(x: number, y: number, element: CircuitElement | string): CircuitElement | undefined {
 		if (!this.game.grid.inBounds(x, y)) return;
 		if (this.game.grid.get(x, y)) return;
 
@@ -17,23 +17,29 @@ export default class ElementController {
 
 		const offset = (gridSize * tileSize) / 2;
 
-		let elementType = null;
-		switch (element) {
-			case 'shmunsistor':
-				elementType = ShmunsistorElement;
-				break;
-			case 'button':
-				elementType = ButtonElement;
-				break;
-			case 'display':
-				elementType = DisplayElement;
-				break;
-			default:
-				elementType = WireElement;
-				break;
+		let entity = element instanceof CircuitElement ? element : null;
+
+		if (!entity) {
+			let elementType = null;
+			switch (element) {
+				case 'shmunsistor':
+					elementType = ShmunsistorElement;
+					break;
+				case 'button':
+					elementType = ButtonElement;
+					break;
+				case 'display':
+					elementType = DisplayElement;
+					break;
+				case 'wire':
+					elementType = WireElement;
+					break;
+				default:
+					elementType = ButtonElement;
+			}
+			entity = new elementType(tileSize);
 		}
 
-		const entity = new elementType(tileSize);
 		entity.position = {
 			x: x * tileSize + tileSize / 2 - offset,
 			y: y * tileSize + tileSize / 2 - offset

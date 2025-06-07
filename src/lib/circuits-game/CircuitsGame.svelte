@@ -8,18 +8,25 @@
 	let canvasEl: HTMLCanvasElement;
 	let game: CircuitsGame | null = null;
 
+	// dragging camera
 	let isDraggingCamera: boolean = false;
 	let lastMouse: Vector = { x: 0, y: 0 };
 
-	let selectedType: string | null = $state(null);
+	// select tool
+	let selectedType: string = $state('button');
 
 	function setSelectedType(type: string) {
 		selectedType = type;
 	}
 
+	// rotating shmunsitors
 	let isRotatingShmunsistor = false;
 	let rotationStartWorld: { x: number; y: number } | null = null;
 	let rotateCell: { x: number; y: number } | null = null;
+
+	//drawing wire
+	let isDrawingWire = false;
+	let lastWireCell: { x: number; y: number } | null = null;
 
 	function getCellCoords(event: PointerEvent) {
 		const tileSize = game!.cfg.tileSize;
@@ -69,6 +76,7 @@
 		} else if (event.button === 0) {
 			const element = game!.getElement(x, y) as any;
 			const isSelectedShmunsistor = selectedType === 'shmunsistor';
+			const isSelectedWire = selectedType === 'wire';
 
 			if (element instanceof ShmunsistorElement) {
 				// Вращаем существующего
@@ -81,8 +89,10 @@
 				isRotatingShmunsistor = true;
 				rotationStartWorld = world;
 				rotateCell = { x, y };
+			} else if (isSelectedWire) {
+				isDrawingWire = true;
+				lastWireCell = { x, y };
 			} else {
-				// Обычное размещение
 				game!.placeElement(x, y, selectedType);
 			}
 		} else if (event.button === 1) {
@@ -120,6 +130,20 @@
 				shmunsistor.direction = direction;
 			}
 		}
+
+		if (isDrawingWire && lastWireCell) {
+			const current = getCellCoords(event);
+			if (current.x === lastWireCell.x && current.y === lastWireCell.y) return;
+
+			const dx = current.x - lastWireCell.x;
+			const dy = current.y - lastWireCell.y;
+
+			// Только соседние клетки
+			if (Math.abs(dx) + Math.abs(dy) === 1) {
+				game!.placeWireBetween(lastWireCell.x, lastWireCell.y, current.x, current.y);
+				lastWireCell = current;
+			}
+		}
 	}
 
 	function onPointerUp(event: PointerEvent) {
@@ -143,15 +167,23 @@
 			if (shmunsistor instanceof ShmunsistorElement) {
 				shmunsistor.direction = direction;
 			}
+
+			isRotatingShmunsistor = false;
+			rotationStartWorld = null;
+			rotateCell = null;
 		}
 
-		isRotatingShmunsistor = false;
-		rotationStartWorld = null;
-		rotateCell = null;
+		if (isDrawingWire) {
+			isDrawingWire = false;
+			lastWireCell = null;
+		}
 	}
 
 	function onMouseLeave() {
 		isDraggingCamera = false;
+
+		isDrawingWire = false;
+		lastWireCell = null;
 	}
 
 	function onWheel(event: WheelEvent) {
