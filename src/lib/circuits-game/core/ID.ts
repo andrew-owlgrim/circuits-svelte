@@ -18,6 +18,10 @@ export default class ID {
 	private static counter = 0;
 	private static baseTimeStamp = 0;
 
+	private constructor() {
+		throw new Error('Events is a static utility class and cannot be instantiated.');
+	}
+
 	static generate(): string {
 		const currentTimeStamp = Math.floor(Date.now() / 1000);
 		if (ID.baseTimeStamp !== currentTimeStamp) {

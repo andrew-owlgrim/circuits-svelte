@@ -1,22 +1,24 @@
-import type { Vector } from '../../game-engine';
-import { Direction } from '../types';
+import type { Vector } from '../../core';
+import { Direction } from '../gameUtils';
 
-import { CircuitElement } from './CircuitElement';
-
-import texture from '../../assets/textures/shmunsistor.svg';
+import { CircuitElement } from '../CircuitElement';
+import gameContext from '../gameContext';
 
 export default class ShmunsistorElement extends CircuitElement {
 	direction: Direction = Direction.Up;
+	invert: boolean = false;
 
 	constructor(bodySize: number) {
 		super(bodySize);
 		this.type = 'shmunsistor';
 
-		const image = new Image();
-		image.src = texture;
-		this.view.drawer = (context) =>
-			drawShmunsistor({ context, size: this.size, direction: this.direction });
+		this.drawer = (context) =>
+			drawShmunsistor({ context, size: this.size, direction: this.direction, invert: this.invert });
 	}
+
+	prepareUpdate(neighbors: Record<Direction, CircuitElement | null>): void {}
+
+	applyUpdate(): void {}
 }
 
 // Drawer
@@ -25,9 +27,10 @@ type DrawShmunsistorOptions = {
 	context: CanvasRenderingContext2D;
 	size: Vector;
 	direction: Direction;
+	invert: boolean;
 };
 
-export function drawShmunsistor({ context, size, direction }: DrawShmunsistorOptions) {
+export function drawShmunsistor({ context, size, direction, invert }: DrawShmunsistorOptions) {
 	const w = size.x;
 	const h = size.y;
 	const halfW = w / 2;
@@ -46,14 +49,19 @@ export function drawShmunsistor({ context, size, direction }: DrawShmunsistorOpt
 	const angle = (angleMap[direction] * Math.PI) / 180;
 	context.rotate(angle);
 
+	context.lineCap = 'round';
+	context.lineJoin = 'round';
+
 	// Рисуем прямоугольник (обводка элемента)
-	context.strokeStyle = '#666';
-	context.lineWidth = 2;
+	context.fillStyle = gameContext.colors.bg;
+	context.fillRect(-halfW, -halfH, w, h);
+	context.strokeStyle = gameContext.colors.border;
+	context.lineWidth = 1.5;
 	context.strokeRect(-halfW, -halfH, w, h);
 
 	// Рисуем треугольник в центре, указывающий направление сигнала
-	const triW = w * 0.5;
-	const triH = h * 0.5;
+	const triW = w * 0.4;
+	const triH = h * 0.35;
 
 	context.beginPath();
 	context.moveTo(0, -triH / 2); // верхняя точка
@@ -61,8 +69,14 @@ export function drawShmunsistor({ context, size, direction }: DrawShmunsistorOpt
 	context.lineTo(-triW / 2, triH / 2); // нижний левый угол
 	context.closePath();
 
-	context.fillStyle = '#ffffff';
-	context.fill();
+	context.strokeStyle = gameContext.colors.inactive;
+	context.lineWidth = 3;
+	context.stroke();
+
+	if (invert) {
+		context.fillStyle = gameContext.colors.inactive;
+		context.fill();
+	}
 
 	context.restore();
 }

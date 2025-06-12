@@ -1,12 +1,12 @@
-import { Entity } from '$lib/circuits-game/game-engine';
-import { Layers } from '../types';
+import { DefaultSceneObject } from '$lib/circuits-game/core';
+import { Layers } from '../gameUtils';
 
-export default class GridEntity extends Entity {
+export default class Grid extends DefaultSceneObject {
 	constructor(tileSize: number, gridSize: number) {
 		super();
 		this.size = { x: tileSize * gridSize, y: tileSize * gridSize };
-		this.view.layer = Layers.Grid;
-		this.view.drawer = (ctx) => {
+		this.layer = Layers.Grid;
+		this.drawer = (ctx) => {
 			drawGrid({ ctx, tileSize, gridSize, color: '#ffffff33', lineWidth: 1 });
 		};
 	}

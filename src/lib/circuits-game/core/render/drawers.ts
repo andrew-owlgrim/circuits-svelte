@@ -1,4 +1,4 @@
-import type { Vector } from './types';
+import type { Vector } from '../coreUtils';
 
 export function textureDrawer(
 	ctx: CanvasRenderingContext2D,

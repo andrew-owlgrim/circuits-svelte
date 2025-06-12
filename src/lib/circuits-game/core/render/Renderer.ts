@@ -1,7 +1,6 @@
-import type Camera from './Camera';
-import type Entity from './Entity';
-import type { Vector } from './types';
-import View from './View';
+import Camera from './Camera';
+import type SceneObject from './SceneObject';
+import type { Vector } from '../coreUtils';
 
 import { rectangleDrawer, textureDrawer } from './drawers';
 
@@ -9,28 +8,22 @@ export default class Renderer {
 	private canvas: HTMLCanvasElement;
 	private ctx: CanvasRenderingContext2D;
 
-	private entities: Map<string, Entity>;
+	private entities: Map<string, SceneObject>;
 	private camera: Camera;
 
 	private isRunning: boolean = false;
 	private animationFrameId: number | null = null;
 	private resizeObserver: ResizeObserver | null = null;
 
-	constructor(canvas: HTMLCanvasElement, entities: Map<string, Entity>, camera: Camera) {
+	constructor(canvas: HTMLCanvasElement, entities?: Map<string, SceneObject>, camera?: Camera) {
 		this.canvas = canvas;
 		const context = canvas.getContext('2d');
 		if (!context) throw new Error('CanvasRenderingContext2D not supported');
 		this.ctx = context;
 
-		this.entities = entities;
-		this.camera = camera;
+		this.entities = entities ?? new Map();
+		this.camera = camera ?? new Camera();
 
-		this.init();
-	}
-
-	// lifecyle
-
-	private init() {
 		this.resizeObserver = new ResizeObserver(() => this.resizeCanvas());
 		this.resizeObserver.observe(this.canvas);
 		this.resizeCanvas();
@@ -85,8 +78,7 @@ export default class Renderer {
 		// prepare entities arr
 
 		const sortedEntities = [...this.entities.values()].sort((a, b) => {
-			const getLayer = (view?: View) => view?.layer ?? 0;
-			return getLayer(a.view) - getLayer(b.view);
+			return a.layer - b.layer;
 		});
 
 		// apply camera
@@ -107,17 +99,16 @@ export default class Renderer {
 		// draw entities
 
 		for (const entity of sortedEntities) {
-			const { view, position, size, rotation } = entity;
-			if (!view) continue;
+			const { drawer, texture, position, size, rotation } = entity;
 
 			this.ctx.save();
 			this.ctx.translate(position.x, position.y);
 			this.ctx.rotate(rotation ?? 0);
 
-			if (view.drawer) {
-				view.drawer(this.ctx);
-			} else if (view.texture) {
-				textureDrawer(this.ctx, size, view.texture);
+			if (drawer) {
+				drawer(this.ctx);
+			} else if (texture) {
+				textureDrawer(this.ctx, size, texture);
 			} else {
 				rectangleDrawer(this.ctx, size);
 			}
