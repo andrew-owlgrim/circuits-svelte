@@ -4,25 +4,52 @@ import { Layers, type Direction } from '../gameUtils';
 import Drawer, { type Shape } from '../../core/drawer/Drawer';
 
 export default class WireElement extends CircuitElement {
-	directions: boolean[] = [false, false, false, false];
 	bridge: boolean = false;
 
 	constructor(size: number) {
 		super(size);
 		this.type = 'wire';
 		this.layer = Layers.Wires;
+
 		this.drawer = (ctx) =>
 			drawWire({
 				ctx,
 				size: this.size.x,
-				directions: this.directions,
-				bridge: this.bridge
+				directions: this.getDirections(),
+				bridge: (this.state & 0b0010_0000) !== 0
 			});
 	}
 
-	prepareUpdate(neighbors: Record<Direction, CircuitElement | null>): void {}
+	// Возвращает directions как [up, right, down, left]
+	private getDirections(): boolean[] {
+		const s = this.state;
+		return [
+			(s & 0b0001) !== 0, // up
+			(s & 0b0010) !== 0, // right
+			(s & 0b0100) !== 0, // down
+			(s & 0b1000) !== 0 // left
+		];
+	}
 
-	applyUpdate(): void {}
+	prepareUpdate(neighborStates: number[]): void {
+		const dirs = this.getDirections();
+		let powered = false;
+
+		for (let i = 0; i < 4; i++) {
+			if (dirs[i] && neighborStates[i] > 0) {
+				powered = true;
+				break;
+			}
+		}
+
+		// Если провод получает сигнал — ставим бит 5 (0b10000)
+		this.nextState = this.state & 0b1111; // сохраняем только направление (4 младших бита)
+		if (powered) this.nextState |= 0b10000; // активен
+	}
+
+	applyUpdate(): void {
+		this.state = this.nextState;
+	}
 }
 
 // Drawer

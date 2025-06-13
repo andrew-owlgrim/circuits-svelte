@@ -11,7 +11,7 @@ export default class DisplayElement extends CircuitElement {
 		this.drawer = (ctx) => drawDisplay({ ctx, size: bodySize });
 	}
 
-	prepareUpdate(neighbors: Record<Direction, CircuitElement | null>): void {}
+	prepareUpdate(): void {}
 
 	applyUpdate(): void {}
 }

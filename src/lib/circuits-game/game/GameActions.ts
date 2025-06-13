@@ -64,8 +64,8 @@ export default class GameActions {
 				if (target instanceof ShmunsistorElement) {
 					target.invert = !target.invert;
 				}
-				if (target instanceof WireElement && target.directions.every(Boolean)) {
-					target.bridge = !target.bridge;
+				if (target instanceof WireElement) {
+					this.switchBridge(target);
 				}
 			}
 		});
@@ -172,10 +172,10 @@ export default class GameActions {
 		const elB = this.game.circuit.get(b.x, b.y);
 
 		if (elA instanceof WireElement) {
-			elA.directions[dirAtoB] = true;
+			elA.state |= 1 << dirAtoB;
 		}
 		if (elB instanceof WireElement) {
-			elB.directions[dirBtoA] = true;
+			elB.state |= 1 << dirBtoA;
 		}
 	}
 
@@ -196,10 +196,15 @@ export default class GameActions {
 			const neighbor = this.game.circuit.get(nx, ny);
 
 			if (neighbor instanceof WireElement) {
-				neighbor.directions[opposite] = false;
-				//todo: better handle bridge case
-				if (neighbor.bridge) neighbor.bridge = false;
+				neighbor.state &= ~(1 << opposite);
+				neighbor.state &= ~0b0010_0000; // снять бит моста, если он был
 			}
+		}
+	}
+
+	switchBridge(target: WireElement) {
+		if ((target.state & 0b1111) === 0b1111) {
+			target.state ^= 0b0010_0000; // toggle bridge bit
 		}
 	}
 

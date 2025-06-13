@@ -12,11 +12,13 @@ export abstract class CircuitElement implements SceneObject {
 	texture: HTMLImageElement | null = null;
 	drawer: ((ctx: CanvasRenderingContext2D) => void) | null = null;
 	public type!: string;
+	state: number = 0;
+	nextState: number = 0;
 
 	constructor(size: number) {
 		this.size = { x: size, y: size };
 	}
 
-	abstract prepareUpdate(neighbors: Record<Direction, CircuitElement | null>): void;
+	abstract prepareUpdate(neighborStates: number[]): void;
 	abstract applyUpdate(): void;
 }

@@ -17,7 +17,7 @@ export default class ShmunsistorElement extends CircuitElement {
 			drawShmunsistor({ ctx, size: this.size.x, direction: this.direction, invert: this.invert });
 	}
 
-	prepareUpdate(neighbors: Record<Direction, CircuitElement | null>): void {}
+	prepareUpdate(): void {}
 
 	applyUpdate(): void {}
 }

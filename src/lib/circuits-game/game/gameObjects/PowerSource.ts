@@ -13,8 +13,7 @@ export default class PowerSourceElement extends CircuitElement {
 			drawSignalSource({
 				ctx,
 				size: this.size.x,
-				direction: this.direction,
-				color: gameContext.colors.active
+				direction: this.direction
 			});
 	}
 
