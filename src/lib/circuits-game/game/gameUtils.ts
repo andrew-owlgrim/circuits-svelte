@@ -12,7 +12,9 @@ export enum Layers {
 	Elements
 }
 
-export type ElementType = 'button' | 'wire' | 'shmunsistor' | 'display';
+export type ElementType = 'button' | 'wire' | 'shmunsistor' | 'display' | 'powerSource';
+// | 'switch'
+// | 'speaker';
 
 export function getDirectionFromDelta(dx: number, dy: number): Direction | null {
 	if (dx === 1 && dy === 0) return Direction.Right;

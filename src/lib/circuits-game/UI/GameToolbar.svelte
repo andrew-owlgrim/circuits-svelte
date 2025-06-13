@@ -1,7 +1,7 @@
 <script lang="ts">
 	let { activeTool = $bindable('button') } = $props();
 
-	const tools = ['button', 'wire', 'shmunsistor', 'display'];
+	const tools = ['button', 'wire', 'shmunsistor', 'display', 'powerSource'];
 </script>
 
 <div class="toolbar">

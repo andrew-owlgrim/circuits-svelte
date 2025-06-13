@@ -14,7 +14,12 @@ const defaultCfg: Cfg = {
 		inactiveDark: '#4D1313',
 		active: '#6699FF',
 		activeDark: '#457AE5',
-		metal: '#A3A3A3',
+		gray: '#B3B3B3',
+		grayDark: '#808080',
+		brightBlue: '#99BBFF',
+		brightBlueDark: '#6688CC',
+		bleakBlue: '#3E485C',
+		bleakBlueDark: '#2E3747',
 		border: '#3D3D3D',
 		bg: '#262626'
 	}
