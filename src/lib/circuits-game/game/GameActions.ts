@@ -8,6 +8,7 @@ import WireElement from './gameObjects/WireElement';
 import { Events, type Vector } from '../core';
 import { MouseButton, type PointerEventPayload } from './CanvasEvents';
 import PowerSourceElement from './gameObjects/PowerSource';
+import SwitchElement from './gameObjects/SwitchElement';
 
 export default class GameActions {
 	private lastWireGridPos: Vector | null = null;
@@ -97,7 +98,8 @@ export default class GameActions {
 			button: ButtonElement,
 			display: DisplayElement,
 			shmunsistor: ShmunsistorElement,
-			powerSource: PowerSourceElement
+			powerSource: PowerSourceElement,
+			switch: SwitchElement
 		} as const;
 
 		const elementClass = elements[type];

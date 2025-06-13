@@ -12,7 +12,7 @@ export default class PowerSourceElement extends CircuitElement {
 		this.drawer = (ctx) =>
 			drawSignalSource({
 				ctx,
-				size: this.size,
+				size: this.size.x,
 				direction: this.direction,
 				color: gameContext.colors.active
 			});
@@ -26,58 +26,30 @@ export default class PowerSourceElement extends CircuitElement {
 
 type DrawSignalSourceOptions = {
 	ctx: CanvasRenderingContext2D;
-	size: { x: number; y: number };
+	size: number;
 	direction: Direction;
-	color?: string;
-	lineWidth?: number;
 };
 
 export function drawSignalSource({ ctx, size, direction }: DrawSignalSourceOptions) {
 	const star = Drawer.create('star', {
-		radius: size.x,
-		sides: 5,
+		radius: size / 3,
+		sides: 4,
 		fill: true,
-		fillStyle: gameContext.colors.bg,
+		fillStyle: gameContext.colors.active,
 		stroke: true,
-		strokeStyle: gameContext.colors.border,
+		strokeStyle: gameContext.colors.activeDark,
 		lineJoin: 'round',
-		cornerRadius: 10
+		cornerRadius: size / 8
 	});
-	const rect = Drawer.create('rect', {
-		width: size.x,
-		height: size.y,
+	const tile = Drawer.create('polygon', {
+		radius: size * 0.55,
+		sides: 4,
 		fill: true,
 		fillStyle: gameContext.colors.bg,
 		stroke: true,
 		strokeStyle: gameContext.colors.border,
 		lineWidth: 1.5,
-		cornerRadius: 100
+		cornerRadius: size / 8
 	});
-	const circle = Drawer.create('circle', {
-		radius: size.x / 3,
-		fill: true,
-		fillStyle: gameContext.colors.inactive,
-		stroke: true,
-		strokeStyle: gameContext.colors.inactiveDark,
-		lineWidth: 1.5
-	});
-	const line1 = Drawer.create('line', {
-		x: -size.x / 4,
-		y: 0,
-		x2: size.x / 4,
-		y2: 0,
-		strokeStyle: 'white',
-		lineWidth: 3,
-		lineCap: 'round'
-	});
-	const line2 = Drawer.create('line', {
-		x: 0,
-		y: -size.x / 4,
-		x2: 0,
-		y2: size.x / 4,
-		strokeStyle: 'white',
-		lineWidth: 3,
-		lineCap: 'round'
-	});
-	Drawer.draw(ctx, [star, rect, circle, line1, line2]);
+	Drawer.draw(ctx, [tile, star]);
 }

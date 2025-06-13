@@ -1,4 +1,5 @@
 import { DefaultSceneObject } from '$lib/circuits-game/core';
+import gameContext from '../gameContext';
 import { Layers } from '../gameUtils';
 
 export default class Grid extends DefaultSceneObject {
@@ -7,7 +8,7 @@ export default class Grid extends DefaultSceneObject {
 		this.size = { x: tileSize * gridSize, y: tileSize * gridSize };
 		this.layer = Layers.Grid;
 		this.drawer = (ctx) => {
-			drawGrid({ ctx, tileSize, gridSize, color: '#ffffff33', lineWidth: 1 });
+			drawGrid({ ctx, tileSize, gridSize });
 		};
 	}
 }
@@ -16,13 +17,13 @@ type GridDrawerOptions = {
 	ctx: CanvasRenderingContext2D;
 	tileSize: number;
 	gridSize: number;
-	color?: string;
-	lineWidth?: number;
 };
 
-function drawGrid({ ctx, tileSize, gridSize, color = '#444', lineWidth = 1 }: GridDrawerOptions) {
+function drawGrid({ ctx, tileSize, gridSize }: GridDrawerOptions) {
 	const totalSize = gridSize * tileSize;
 	const halfSize = totalSize / 2;
+	const color = gameContext.colors.border,
+		lineWidth = 1;
 
 	ctx.save();
 	ctx.strokeStyle = color;

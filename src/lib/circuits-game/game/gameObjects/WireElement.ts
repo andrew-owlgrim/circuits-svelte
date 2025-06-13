@@ -1,6 +1,7 @@
 import { CircuitElement } from '../CircuitElement';
 import gameContext from '../gameContext';
 import { Layers, type Direction } from '../gameUtils';
+import Drawer, { type Shape } from '../../core/drawer/Drawer';
 
 export default class WireElement extends CircuitElement {
 	directions: boolean[] = [false, false, false, false];
@@ -13,10 +14,9 @@ export default class WireElement extends CircuitElement {
 		this.drawer = (ctx) =>
 			drawWire({
 				ctx,
-				size: this.size,
+				size: this.size.x,
 				directions: this.directions,
-				bridge: this.bridge,
-				color: gameContext.colors.inactive
+				bridge: this.bridge
 			});
 	}
 
@@ -29,75 +29,76 @@ export default class WireElement extends CircuitElement {
 
 type DrawWireOptions = {
 	ctx: CanvasRenderingContext2D;
-	size: { x: number; y: number };
+	size: number;
 	directions: boolean[]; // [up, right, down, left]
-	color?: string;
-	lineWidth?: number;
 	bridge?: boolean;
 };
 
-export function drawWire({
-	ctx,
-	size,
-	directions,
-	color = '#ffffff',
-	lineWidth = 3,
-	bridge = false
-}: DrawWireOptions) {
-	const halfW = size.x / 2;
-	const halfH = size.y / 2;
-
-	ctx.save();
-	ctx.strokeStyle = color;
-	ctx.lineWidth = lineWidth;
-	ctx.lineCap = 'round';
-
-	const center = { x: 0, y: 0 };
-	const points = [
-		{ x: 0, y: -halfH }, // up
-		{ x: halfW, y: 0 }, // right
-		{ x: 0, y: halfH }, // down
-		{ x: -halfW, y: 0 } // left
-	];
-
+export function drawWire({ ctx, size, directions, bridge = false }: DrawWireOptions) {
+	const color = gameContext.colors.inactive;
 	const activeCount = directions.filter(Boolean).length;
+	const shapes = [];
+
+	const strokeStyle: Partial<Shape> = {
+		lineWidth: 3,
+		strokeStyle: color,
+		lineCap: 'round'
+	};
 
 	if (bridge && directions.every(Boolean)) {
-		// Мост
-		const shortLength = halfW * 0.5;
-
-		ctx.beginPath();
-		// Горизонтальные короткие линии
-		ctx.moveTo(-halfW, 0);
-		ctx.lineTo(-halfW + shortLength, 0);
-
-		ctx.moveTo(halfW, 0);
-		ctx.lineTo(halfW - shortLength, 0);
-
-		// Вертикальная длинная линия
-		ctx.moveTo(0, -halfH);
-		ctx.lineTo(0, halfH);
-
-		ctx.stroke();
+		const long = Drawer.create('line', {
+			x: 0,
+			y: -size / 2,
+			x2: 0,
+			y2: size / 2,
+			...strokeStyle
+		});
+		const short1 = Drawer.create('line', {
+			x: -size / 2,
+			y: 0,
+			x2: -size / 4,
+			y2: 0,
+			...strokeStyle
+		});
+		const short2 = Drawer.create('line', {
+			x: size / 2,
+			y: 0,
+			x2: size / 4,
+			y2: 0,
+			...strokeStyle
+		});
+		shapes.push(long, short1, short2);
 	} else {
-		// Стандартные соединения
-		ctx.beginPath();
+		const points = [
+			{ x: 0, y: -size / 2 }, // Up
+			{ x: size / 2, y: 0 }, // Right
+			{ x: 0, y: size / 2 }, // Down
+			{ x: -size / 2, y: 0 } // Left
+		];
+
 		for (let i = 0; i < 4; i++) {
 			if (directions[i]) {
-				ctx.moveTo(center.x, center.y);
-				ctx.lineTo(points[i].x, points[i].y);
+				shapes.push(
+					Drawer.create('line', {
+						x2: points[i].x,
+						y2: points[i].y,
+						...strokeStyle
+					})
+				);
 			}
 		}
-		ctx.stroke();
 
 		if (activeCount <= 1) {
-			// Рисуем кружочек в центре
-			ctx.beginPath();
-			ctx.arc(center.x, center.y, lineWidth * 1.5, 0, Math.PI * 2);
-			ctx.fillStyle = color;
-			ctx.fill();
+			//draw circle in the middle
+			shapes.push(
+				Drawer.create('circle', {
+					radius: size / 6,
+					fill: true,
+					fillStyle: color,
+					stroke: false
+				})
+			);
 		}
 	}
-
-	ctx.restore();
+	Drawer.draw(ctx, shapes);
 }
