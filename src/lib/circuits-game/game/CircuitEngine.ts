@@ -4,14 +4,15 @@ import type { CircuitElement } from './CircuitElement';
 export class CircuitEngine {
 	private circuit: Circuit;
 	private intervalId: number | null = null;
-	private tickInterval = 100;
+	private tickInterval: number;
 
-	constructor(circuit: Circuit) {
+	constructor(circuit: Circuit, tickRate?: number) {
 		this.circuit = circuit;
+		this.tickInterval = tickRate || 100;
+		console.log(this.tickInterval);
 	}
 
-	run(tickRateMs: number = 100) {
-		this.tickInterval = tickRateMs;
+	run() {
 		if (this.intervalId === null) {
 			this.intervalId = setInterval(() => this.update(), this.tickInterval);
 		}

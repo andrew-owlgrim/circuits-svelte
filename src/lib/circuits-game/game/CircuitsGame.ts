@@ -30,7 +30,7 @@ export default class CircuitsGame {
 		this.cfg = { ...defaultCfg, ...outerCfg };
 		this.circuit = new Circuit(this.cfg.gridSize, this.cfg.gridSize);
 		this.context = gameContext;
-		this.circuitEngine = new CircuitEngine(this.circuit);
+		this.circuitEngine = new CircuitEngine(this.circuit, this.cfg.updateRate);
 
 		// init
 

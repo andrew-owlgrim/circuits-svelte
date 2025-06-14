@@ -8,7 +8,7 @@ export type Cfg = {
 const defaultCfg: Cfg = {
 	tileSize: 32,
 	gridSize: 64,
-	updateRate: 100,
+	updateRate: 1000,
 	colors: {
 		inactive: '#7F2626',
 		inactiveDark: '#4D1313',

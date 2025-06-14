@@ -66,3 +66,5 @@ export function enumToBit(enumValue: number): number {
 export function bitToEnum(bit: number): number {
 	return Math.log2(bit); // если bit — это ровно одна единичка
 }
+
+export const OppositeMasks = [0b0100, 0b1000, 0b0001, 0b0010];
