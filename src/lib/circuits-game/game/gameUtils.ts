@@ -50,3 +50,19 @@ const deltaMap: Record<Direction, Vector> = {
 export function getDelta(dir: Direction): Vector {
 	return deltaMap[dir];
 }
+
+export const enum StateFlags {
+	Up = 0b0000_0001,
+	Right = 0b0000_0010,
+	Down = 0b0000_0100,
+	Left = 0b0000_1000,
+	Output = 0b0001_0000
+}
+
+export function enumToBit(enumValue: number): number {
+	return 1 << enumValue;
+}
+
+export function bitToEnum(bit: number): number {
+	return Math.log2(bit); // если bit — это ровно одна единичка
+}

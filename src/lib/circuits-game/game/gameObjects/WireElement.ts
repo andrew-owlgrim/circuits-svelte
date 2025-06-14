@@ -1,6 +1,6 @@
 import { CircuitElement } from '../CircuitElement';
 import gameContext from '../gameContext';
-import { Layers, type Direction } from '../gameUtils';
+import { Layers, StateFlags, type Direction } from '../gameUtils';
 import Drawer, { type Shape } from '../../core/drawer/Drawer';
 
 export default class WireElement extends CircuitElement {
@@ -16,7 +16,8 @@ export default class WireElement extends CircuitElement {
 				ctx,
 				size: this.size.x,
 				directions: this.getDirections(),
-				bridge: (this.state & 0b0010_0000) !== 0
+				bridge: (this.state & 0b0010_0000) !== 0,
+				active: (this.state & 0b0001_0000) !== 0
 			});
 	}
 
@@ -32,19 +33,29 @@ export default class WireElement extends CircuitElement {
 	}
 
 	prepareUpdate(neighborStates: number[]): void {
+		const OppositeMasks = [0b0100, 0b1000, 0b0001, 0b0010]; // down, left, up, right
+
 		const dirs = this.getDirections();
 		let powered = false;
 
 		for (let i = 0; i < 4; i++) {
-			if (dirs[i] && neighborStates[i] > 0) {
+			if (!dirs[i]) continue;
+
+			const neighbor = neighborStates[i];
+			const hasOutput = (neighbor & StateFlags.Output) !== 0;
+			const hasDirectionToward = (neighbor & OppositeMasks[i]) !== 0;
+
+			if (hasOutput && hasDirectionToward) {
 				powered = true;
 				break;
 			}
 		}
 
-		// Если провод получает сигнал — ставим бит 5 (0b10000)
-		this.nextState = this.state & 0b1111; // сохраняем только направление (4 младших бита)
-		if (powered) this.nextState |= 0b10000; // активен
+		this.nextState = this.state & 0b1111; // сохраняем только направления
+
+		if (powered) {
+			this.nextState |= StateFlags.Output;
+		}
 	}
 
 	applyUpdate(): void {
@@ -59,10 +70,11 @@ type DrawWireOptions = {
 	size: number;
 	directions: boolean[]; // [up, right, down, left]
 	bridge?: boolean;
+	active: boolean;
 };
 
-export function drawWire({ ctx, size, directions, bridge = false }: DrawWireOptions) {
-	const color = gameContext.colors.inactive;
+export function drawWire({ ctx, size, directions, bridge = false, active }: DrawWireOptions) {
+	const color = active ? gameContext.colors.active : gameContext.colors.inactive;
 	const activeCount = directions.filter(Boolean).length;
 	const shapes = [];
 

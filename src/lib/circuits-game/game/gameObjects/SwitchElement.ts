@@ -29,24 +29,24 @@ type DrawButtonOptions = {
 };
 
 function drawButton({ ctx, size, enabled }: DrawButtonOptions) {
-	// const tile = Drawer.create('circle', {
-	// 	radius: size / 2,
-	// 	fill: true,
-	// 	fillStyle: gameContext.colors.bg,
-	// 	stroke: true,
-	// 	strokeStyle: gameContext.colors.border,
-	// 	lineWidth: 1.5
-	// });
-	const tile = Drawer.create('polygon', {
-		radius: size * 0.55,
-		sides: 4,
+	const tile = Drawer.create('circle', {
+		radius: size / 2,
 		fill: true,
 		fillStyle: gameContext.colors.bg,
 		stroke: true,
 		strokeStyle: gameContext.colors.border,
-		lineWidth: 1.5,
-		cornerRadius: size / 8
+		lineWidth: 1.5
 	});
+	// const tile = Drawer.create('polygon', {
+	// 	radius: size * 0.55,
+	// 	sides: 4,
+	// 	fill: true,
+	// 	fillStyle: gameContext.colors.bg,
+	// 	stroke: true,
+	// 	strokeStyle: gameContext.colors.border,
+	// 	lineWidth: 1.5,
+	// 	cornerRadius: size / 8
+	// });
 	const border = Drawer.create('rect', {
 		width: size * 0.8,
 		height: size * 0.55,

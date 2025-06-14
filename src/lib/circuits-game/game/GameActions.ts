@@ -19,7 +19,7 @@ export default class GameActions {
 	attachEvents() {
 		// pointerDown
 		Events.on(this.game.canvas, 'pointerDown', (e) => {
-			if (e.button === MouseButton.Left) {
+			if (e.button === MouseButton.Left && !e.gridTarget) {
 				this.placeElement(e.grid.x, e.grid.y, this.game.activeTool);
 			}
 			if (e.button === MouseButton.Right) {
@@ -73,6 +73,27 @@ export default class GameActions {
 		// wheel
 		this.scaleCamera = this.scaleCamera.bind(this);
 		Events.on(this.game.canvas, 'wheel', this.scaleCamera);
+
+		// button
+		Events.on(this.game.canvas, 'pointerDown', (e) => {
+			if (e.button === MouseButton.Left && e.gridTargetStart instanceof ButtonElement) {
+				this.pressButton(e.gridTargetStart);
+			}
+		});
+		Events.on(this.game.canvas, 'drag', (e) => {
+			if (
+				e.button === MouseButton.Left &&
+				e.gridTargetStart instanceof ButtonElement &&
+				e.gridTargetStart !== e.gridTarget
+			) {
+				this.releaseButton(e.gridTargetStart);
+			}
+		});
+		Events.on(this.game.canvas, 'pointerUp', (e) => {
+			if (e.button === MouseButton.Left && e.gridTargetStart instanceof ButtonElement) {
+				this.releaseButton(e.gridTargetStart);
+			}
+		});
 	}
 
 	destroy() {
@@ -206,6 +227,16 @@ export default class GameActions {
 		if ((target.state & 0b1111) === 0b1111) {
 			target.state ^= 0b0010_0000; // toggle bridge bit
 		}
+	}
+
+	// button
+
+	pressButton(target: ButtonElement) {
+		target.state = target.state | (1 << 5); // Устанавливаем 6-й бит
+	}
+
+	releaseButton(target: ButtonElement) {
+		target.state = target.state & ~(1 << 5);
 	}
 
 	// camera

@@ -8,6 +8,7 @@ import Grid from './gameObjects/Grid';
 import CanvasEvents from './CanvasEvents';
 import GameActions from './GameActions';
 import gameContext, { type GameContext } from './gameContext';
+import { CircuitEngine } from './CircuitEngine';
 
 export default class CircuitsGame {
 	cfg: Cfg;
@@ -20,6 +21,7 @@ export default class CircuitsGame {
 	actions: GameActions = new GameActions(this);
 	activeTool: ElementType = 'button';
 	context: GameContext;
+	circuitEngine: CircuitEngine;
 
 	constructor(canvas: HTMLCanvasElement, outerCfg?: Partial<Cfg>) {
 		this.canvas = canvas;
@@ -28,6 +30,7 @@ export default class CircuitsGame {
 		this.cfg = { ...defaultCfg, ...outerCfg };
 		this.circuit = new Circuit(this.cfg.gridSize, this.cfg.gridSize);
 		this.context = gameContext;
+		this.circuitEngine = new CircuitEngine(this.circuit);
 
 		// init
 
@@ -47,10 +50,12 @@ export default class CircuitsGame {
 
 	run() {
 		this.render.run();
+		this.circuitEngine.run();
 	}
 
 	stop() {
 		this.render.stop();
+		this.circuitEngine.stop();
 	}
 
 	// placeWireBetween(x1: number, y1: number, x2: number, y2: number) {
